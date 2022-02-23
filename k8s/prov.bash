@@ -1,13 +1,13 @@
 #!/bin/bash
 
-PROFILE_NAME:="dev"
-LB_ADRESSES:=""
-PROFILE:="dev"
-INFRA_PATH:="infra"
-APP_PATH:="apps"
-NAMESPACE:="default"
-APP_REPO:=""
-INFRA_REPO:="https://github.com/turkelk/infra-apps"
+APP_REPO=${APP_REPO:-null}
+LB_ADRESSES=${LB_ADRESSES:-192.168.100.85-192.168.100.98}
+PROFILE_NAME=${PROFILE_NAME:-dev}
+PROFILE=${PROFILE:-dev}
+INFRA_PATH=${INFRA_PATH:-apps}
+APP_PATH=${APP_PATH:-apps}
+NAMESPACE=${NAMESPACE:-default}
+INFRA_REPO=${INFRA_REPO:-https:\/\/github.com\/mc-istio\/infra-apps}
 
 errorExit () {
     echo -e "\nERROR: $1"; echo
@@ -18,7 +18,7 @@ usage () {
     cat << END_USAGE
  <options>
 --repo              : [required] A git repo for application
---lb                : [required] Adresses for load balancers
+--lb                : [optional] Adresses for load balancers
 --profile pr        : [optional] A profile name. Default is dev. Could be sit, uat, prod
 --infra-path ip     : [optional] A custom infra app of apps path. Default is infra
 --app-path app      : [optional] A custom business app of apps path. Default is apps
@@ -53,10 +53,7 @@ processOptions () {
             ;; 
             --ns)
                 NAMESPACE=${2}; shift 2
-            ;;  
-            --repo)
-                APP_REPO=${2}; shift 2
-            ;;  
+            ;;   
             --infra-repo)
                 INFRA_REPO=${2}; shift 2
             ;;                                                   
@@ -72,7 +69,7 @@ processOptions () {
 
 startMinikube() {
   minikube start \
-    --profile ${PROFILE} \
+    --profile "${PROFILE}" \
     --addons registry \
     --addons ingress \
     --addons metallb \
@@ -91,7 +88,7 @@ data:
     address-pools:
     - name: default
       protocol: layer2
-      addresses: [${LB_ADRESSES}]
+      addresses: ["${LB_ADRESSES}"]
 EOF
 }
 
@@ -100,13 +97,12 @@ installArgo () {
   kubectl --context="${PROFILE_NAME}" create namespace argocd
   kubectl --context="${PROFILE_NAME}"  apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-  kubectl --context="${PROFILE_NAME}" wait --for=condition=ready pod -l app=blog 
-  # --timeout=60s
+  kubectl --context="${PROFILE_NAME}" wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=24h
 }
 
 # Install argocd cli 
 installArgoCli () {
-  curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+  curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v2.2.5/argocd-darwin-amd64
   chmod +x /usr/local/bin/argocd
 }
 
@@ -118,20 +114,32 @@ argoLogin () {
 # Create infra apps
 createInfraApps () {
   argocd app create infra \
-  --repo {INFRA_REPO} \
+  --repo ${INFRA_REPO} \
   --path ${INFRA_PATH} \
-  --dest-namespace {NAMESPACE} \
-  --dest-server https://kubernetes.default.svc
+  --dest-server https://kubernetes.default.svc \
+  --sync-policy automated \
+  --values values.yaml
   # --helm-set replicaCount=2
 }
 
 # Create business apps
 createApps () {
   argocd app create apps \
-  --repo {APP_REPO} \
+  --repo ${APP_REPO} \
   --path ${APP_PATH} \
-  --dest-namespace {NAMESPACE} \
-  --dest-server https://kubernetes.default.svc
+  --dest-server https://kubernetes.default.svc \
+  --sync-policy automated \
+  --values values.yaml
+}
+
+# Change namespace to argo
+changeContextToArgo () {
+  kubectl config set-context --current --namespace=argocd
+}
+
+# Change namespace to default
+changeContextToDefault () {
+  kubectl config set-context --current --namespace=default
 }
 
 main () {
@@ -143,14 +151,17 @@ main () {
     echo "INFRA_PATH:   ${INFRA_PATH}"
     echo "APP_PATH:     ${APP_PATH}"
     echo "NAMESPACE:    ${NAMESPACE}"
-    echo "GIT_REPO:     ${GIT_REPO}"    
+    echo "APP_REPO:     ${APP_REPO}"   
+    echo "INFRA_REPO:   ${INFRA_REPO}"        
 
     startMinikube    
-    installArgo
-    argoLogin
+    installArgo    
     installArgoCli
+    changeContextToArgo
+    argoLogin
     createApps
     createInfraApps
+    changeContextToDefault
 }
 
 
