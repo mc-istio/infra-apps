@@ -1,0 +1,28 @@
+# Start Dev Cluster
+
+sh prov.bash \
+--repo https://github.com/mc-istio/argo-business-apps \
+--app-path banking/apps \
+--profile dev \
+--infra-repo https://github.com/mc-istio/infra-apps \
+--lb 192.168.100.85-192.168.100.98
+
+
+# Start CI/CD Cluster
+
+sh prov.bash \
+--repo https://github.com/mc-istio/jenkins \
+--app-path apps \
+--profile jenkins \
+--infra-repo https://github.com/mc-istio/infra-apps \
+--lb 192.168.101.85-192.168.101.98
+
+# Start SIT Cluster
+
+sh prov.bash \
+--repo https://github.com/mc-istio/argo-business-apps \
+--app-path banking/apps \
+--profile sit \
+--infra-repo https://github.com/mc-istio/infra-apps \
+--lb 192.168.102.85-192.168.102.98
+

@@ -3,7 +3,6 @@
 APP_REPO=${APP_REPO:-null}
 LB_ADRESSES=${LB_ADRESSES:-192.168.100.85-192.168.100.98}
 PROFILE_NAME=${PROFILE_NAME:-dev}
-PROFILE=${PROFILE:-dev}
 INFRA_PATH=${INFRA_PATH:-apps}
 APP_PATH=${APP_PATH:-apps}
 NAMESPACE=${NAMESPACE:-default}
@@ -43,7 +42,7 @@ processOptions () {
                 LB_ADRESSES=${2}; shift 2
             ;;
             --profile)
-                PROFILE=${2}; shift 2
+                PROFILE_NAME=${2}; shift 2
             ;;
             --infra-path)
                 INFRA_PATH=${2}; shift 2
@@ -69,7 +68,7 @@ processOptions () {
 
 startMinikube() {
   minikube start \
-    --profile "${PROFILE}" \
+    --profile "${PROFILE_NAME}" \
     --addons registry \
     --addons ingress \
     --addons metallb \
@@ -95,7 +94,8 @@ EOF
 # Install argocd
 installArgo () {
   kubectl --context="${PROFILE_NAME}" create namespace argocd
-  kubectl --context="${PROFILE_NAME}"  apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+  kubectl --context="${PROFILE_NAME}"  apply -n argocd -f argo-install.yaml
+  # https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
   kubectl --context="${PROFILE_NAME}" wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=24h
 }
@@ -147,7 +147,6 @@ main () {
 
     echo "PROFILE_NAME: ${PROFILE_NAME}"
     echo "LB_ADRESSES:  ${LB_ADRESSES}"
-    echo "PROFILE:      ${PROFILE}"
     echo "INFRA_PATH:   ${INFRA_PATH}"
     echo "APP_PATH:     ${APP_PATH}"
     echo "NAMESPACE:    ${NAMESPACE}"
