@@ -1,6 +1,6 @@
 apiVersion: v2
-name: infra-apps
+name: apps-infra
 description: Applications
 type: application
-version: 0.1.0
-appVersion: "1.0"
+version: 1.0.0
+appVersion: "1.0.0"
