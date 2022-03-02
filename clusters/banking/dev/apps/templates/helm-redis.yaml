@@ -12,9 +12,6 @@ spec:
     repoURL: https://charts.bitnami.com/bitnami
     chart: bitnami/redis
     targetRevision: 16.4.5
-    # helm:    
-    #   valueFiles: 
-    #     - values-${ARGOCD_APP_NAMESPACE}.yaml
   destination:
     namespace: logging
     server: {{ .Values.spec.destination.server }}
