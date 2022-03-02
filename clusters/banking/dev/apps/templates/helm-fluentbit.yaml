@@ -12,8 +12,8 @@ spec:
     repoURL: https://fluent.github.io/helm-charts
     chart: fluent/fluent-bit
     targetRevision: 0.19.19
-  helm:    
-    valuesFile: ['values.yaml']
+    helm:    
+      valuesFile: ['values.yaml']
   destination:
     namespace: logging
     server: {{ .Values.spec.destination.server }}
