@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: helm-redis
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: bitnami/redis
+    targetRevision: 16.4.5
+    helm:    
+      valueFiles: 
+        - values-${ARGOCD_APP_NAMESPACE}.yaml
+  destination:
+    namespace: logging
+    server: {{ .Values.spec.destination.server }}
+  syncPolicy:
+    automated:  
+      prune: true    
