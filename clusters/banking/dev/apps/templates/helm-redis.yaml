@@ -9,9 +9,12 @@ spec:
   project: default
   
   source:
-    repoURL: https://charts.bitnami.com/bitnami
-    chart: bitnami/redis
+    repoURL: 'https://charts.bitnami.com/bitnami'
     targetRevision: 16.4.5
+    helm:
+      valueFiles:
+        - values.yaml
+    chart: redis 
   destination:
     namespace: logging
     server: {{ .Values.spec.destination.server }}
