@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: bitnami/redis
-    targetRevision: 6.2.6
+    targetRevision: 16.4.5
   destination:
     namespace: logging
     server: {{ .Values.spec.destination.server }}
