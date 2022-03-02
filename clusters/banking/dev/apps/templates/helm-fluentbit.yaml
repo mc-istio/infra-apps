@@ -13,7 +13,8 @@ spec:
     chart: fluent/fluent-bit
     targetRevision: 1.8.12
     helm:    
-      valueFiles: ['values.yaml']
+      valueFiles: 
+        - values-${ARGOCD_APP_NAMESPACE}.yaml
   destination:
     namespace: logging
     server: {{ .Values.spec.destination.server }}
