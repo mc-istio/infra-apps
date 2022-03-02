@@ -13,7 +13,7 @@ spec:
     chart: fluent/fluent-bit
     targetRevision: 0.19.19
     helm:    
-      valuesFile: ['values.yaml']
+      valueFiles: ['values.yaml']
   destination:
     namespace: logging
     server: {{ .Values.spec.destination.server }}
