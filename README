@@ -5,7 +5,7 @@ sh prov.bash \
 --app-path banking/apps \
 --profile dev \
 --infra-repo https://github.com/mc-istio/infra-apps \
---app-path clusters/banking/dev/apps  \
+--infra-path clusters/banking/dev/apps  \
 --lb 192.168.100.85-192.168.100.98
 
 
