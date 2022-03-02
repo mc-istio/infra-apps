@@ -2,7 +2,7 @@ replicaCount: 1
 global:
   image:
     repository: fluent/fluent-bit
-    tag: ""
+    tag: latest
     pullPolicy: Always
 
   service:
