@@ -1,0 +1,6 @@
+dependencies:
+- name: base
+  repository: file://../../../../base/fluentbit
+  version: 1.0.0
+digest: sha256:3e79db6cc339cc669915ab299af0106fe9b5b4c72b57d7a4ae5677b9df4fec63
+generated: "2022-03-02T21:13:02.713707+04:00"
